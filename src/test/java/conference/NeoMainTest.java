@@ -1,20 +1,19 @@
 package conference;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.impl.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.data.neo4j.core.GraphDatabase;
+import org.springframework.data.neo4j.conversion.Result;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Set;
 
 import static java.time.LocalDate.now;
 import static java.time.LocalTime.of;
@@ -33,17 +32,10 @@ public class NeoMainTest {
     @Autowired
     private SpeakerRepository speakerRepository;
 
-    @Autowired
-    private GraphDatabase graphDatabase;
-
     @Before
+    @Transactional
+    @Rollback(false)
     public void setup() throws IOException {
-        FileUtils.deleteRecursively(new File("conference.db"));
-
-    }
-
-    @Test
-    public void test(){
         Speaker jeka = new Speaker("Evgeny Borisov");
         Talk ripper = new Talk("Spring The Ripper", time("12:30"));
         jeka.addTalk(ripper);
@@ -51,19 +43,35 @@ public class NeoMainTest {
 
         Speaker nikolay = new Speaker("Nikolay Alimenkov");
         nikolay.addTalk(new Talk("CD JEE7", time("18:00")));
+        speakerRepository.save(Arrays.asList(jeka, nikolay));
+    }
 
+    @Test
+    @Transactional
+    public void testFindAll() {
+        Result<Speaker> speakers = speakerRepository.findAll();
+        speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
+    }
 
-        try (Transaction tx = graphDatabase.beginTx()) {
-            speakerRepository.save(Arrays.asList(jeka, nikolay));
-            long count = speakerRepository.count();
-            System.out.println("count = " + count);
-            Speaker speaker = speakerRepository.findByName("Evgeny Borisov").get(0);
-            Set<Talk> talks = speaker.getTalks();
-            for (Talk talk : talks) {
-                System.out.println("talk = " + talk);
-            }
-            tx.success();
-        }
+    @Test
+    @Transactional
+    public void testByName() {
+        Iterable<Speaker> speakers = speakerRepository.findByName("Evgeny Borisov");
+        speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
+    }
+
+    @Test
+    @Transactional
+    public void testByNameLike() {
+        Iterable<Speaker> speakers = speakerRepository.findByNameLike(".*Evgeny.*");
+        speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
+    }
+
+    @After
+    @Transactional
+    @Rollback(false)
+    public void cleanup() throws IOException {
+        speakerRepository.deleteAll();
     }
 
     private Date time(String time) {

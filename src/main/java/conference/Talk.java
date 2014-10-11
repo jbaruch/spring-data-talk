@@ -1,13 +1,18 @@
 package conference;
 
+import org.springframework.data.neo4j.annotation.GraphId;
+import org.springframework.data.neo4j.annotation.NodeEntity;
+
 import java.util.Date;
 
 /**
  * @author Jeka
  * @since 07/10/2014
  */
+@NodeEntity
 public class Talk {
 
+    @GraphId
     private Long talkId;
 
     private Date when;
