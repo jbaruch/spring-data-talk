@@ -1,5 +1,6 @@
 package conference;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,11 +16,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-
-import static java.time.LocalDate.now;
-import static java.time.LocalTime.of;
-import static java.time.ZoneId.systemDefault;
-import static java.util.Date.from;
 
 /**
  * @author Jeka
@@ -37,8 +33,7 @@ public class JpaMainTest {
     @Before
     @Transactional
     @Rollback(false)
-    public void setUp(){
-
+    public void setUp() {
 
         Speaker jeka = new Speaker("Evgeny Borisov");
         jeka.addTalk(new Talk("Spring The Ripper", time("12:30")));
@@ -48,7 +43,10 @@ public class JpaMainTest {
         Speaker nikolay = new Speaker("Nikolay Alimenkov");
         nikolay.addTalk(new Talk("CD JEE7", time("18:00")));
 
-        speakerRepository.save(Arrays.asList(jeka, nikolay));
+        Speaker baruch = new Speaker("Baruch Sadogursky");
+        baruch.addTalk(new Talk("AST Groovy", time("12:00")));
+
+        speakerRepository.save(Arrays.asList(baruch, jeka, nikolay));
     }
 
     @Test
@@ -56,7 +54,7 @@ public class JpaMainTest {
     public void testJpa() {
 
         LOG.info("count = " + speakerRepository.count());
-        List<Speaker> allSpeakers = speakerRepository.getAllSpeakers();
+        Iterable<Speaker> allSpeakers = speakerRepository.findAll();
         for (Speaker speaker : allSpeakers) {
             LOG.info(speaker.getName());
         }
@@ -65,12 +63,25 @@ public class JpaMainTest {
         for (Talk talk : talks) {
             LOG.info("talk = " + talk);
         }
+
+        LOG.info("********* ALL SPEAKERS WITH ov ***********");
+        List<Speaker> speakers = speakerRepository.findByNameLike("%ov%");
+        for (Speaker speaker1 : speakers) {
+            LOG.info(speaker1.getName());
+        }
+    }
+
+    @After
+    @Transactional
+    public void clean() {
+        speakerRepository.deleteAll();
     }
 
     private Date time(String time) {
         String[] split = time.split(":");
+
         int hours = Integer.parseInt(split[0]);
         int minutes = Integer.parseInt(split[1]);
-        return from(of(hours, minutes).atDate(now()).atZone(systemDefault()).toInstant());
+        return new Date(114, 9, 17, hours, minutes);
     }
 }
