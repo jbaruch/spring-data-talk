@@ -1,6 +1,5 @@
 package conference;
 
-import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,15 +7,11 @@ import java.util.Set;
  * @author Jeka
  * @since 07/10/2014
  */
-@Entity
 public class Speaker {
-    @Id
-    @GeneratedValue
     private Long speakerId;
 
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Talk> talks;
 
     public Speaker() {
