@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.annotation.RelatedTo;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.neo4j.graphdb.Direction.INCOMING;
+import static org.neo4j.graphdb.Direction.BOTH;
 
 /**
  * @author Jeka
@@ -22,19 +22,23 @@ public class Speaker {
 
     private String name;
 
-    @RelatedTo(direction = INCOMING)
+    @RelatedTo(direction = BOTH)
     private @Fetch Set<Talk> talks;
 
     public Speaker() {
+        talks = new HashSet<Talk>();
     }
 
     public Speaker(String name) {
+        this();
         this.name = name;
+
     }
 
     public void addTalk(Talk talk) {
-        if(talks==null) talks = new HashSet<Talk>();
+        talk.setSpeaker(this);
         talks.add(talk);
+
     }
 
     public String getName() {
@@ -48,5 +52,22 @@ public class Speaker {
     @Override
     public String toString() {
         return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Speaker speaker = (Speaker) o;
+
+        if (name != null ? !name.equals(speaker.name) : speaker.name != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.hashCode() : 0;
     }
 }

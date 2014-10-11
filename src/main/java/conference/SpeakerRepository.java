@@ -16,4 +16,8 @@ public interface SpeakerRepository extends GraphRepository<Speaker>{
 
     List<Speaker> findByNameLike(String name);
 
+//    "(speaker:Speaker) RETURN Speaker"
+//    @Query("MATCH (speaker:Speaker {name:{0}})<--(talk:Talk) RETURN talk")
+//    Set<Speaker> getSpeakersWithTalksAbout(String name);
+
 }

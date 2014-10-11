@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import static java.time.LocalDate.now;
 import static java.time.LocalTime.of;
@@ -27,13 +28,16 @@ import static java.util.Date.from;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(classes = Neo4jConfig.class)
+@Transactional
 public class NeoMainTest {
 
     @Autowired
     private SpeakerRepository speakerRepository;
 
+    @Autowired
+    private TalkRepository talkRepository;
+
     @Before
-    @Transactional
     @Rollback(false)
     public void setup() throws IOException {
         Speaker jeka = new Speaker("Evgeny Borisov");
@@ -47,28 +51,32 @@ public class NeoMainTest {
     }
 
     @Test
-    @Transactional
     public void testFindAll() {
         Result<Speaker> speakers = speakerRepository.findAll();
         speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
     }
 
     @Test
-    @Transactional
     public void testByName() {
         Iterable<Speaker> speakers = speakerRepository.findByName("Evgeny Borisov");
         speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
     }
 
     @Test
-    @Transactional
     public void testByNameLike() {
         Iterable<Speaker> speakers = speakerRepository.findByNameLike(".*Evgeny.*");
         speakers.forEach(speaker -> System.out.println("speaker = " + speaker));
     }
 
+    @Test
+    public void testTalksBySpeaker(){
+        List<Talk> talks = talkRepository.findTalksBySpeakerName("Evgeny Borisov");
+
+//        Iterable<Talk> talks = talkRepository.findAllTalkBySpeaker("Evgeny Borisov");
+        talks.forEach(talk -> System.out.println("talk = " + talk));
+    }
+
     @After
-    @Transactional
     @Rollback(false)
     public void cleanup() throws IOException {
         speakerRepository.deleteAll();

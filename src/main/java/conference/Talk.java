@@ -1,7 +1,9 @@
 package conference;
 
+import org.neo4j.graphdb.Direction;
 import org.springframework.data.neo4j.annotation.GraphId;
 import org.springframework.data.neo4j.annotation.NodeEntity;
+import org.springframework.data.neo4j.annotation.RelatedTo;
 
 import java.util.Date;
 
@@ -19,12 +21,24 @@ public class Talk {
 
     private String title;
 
+    @RelatedTo(direction = Direction.BOTH)
+    private Speaker speaker;
+
     public Talk() {
     }
 
     public Talk(String title, Date date) {
         this.title = title;
         this.when = date;
+    }
+
+    public Speaker getSpeaker() {
+        return speaker;
+    }
+
+
+    public void setSpeaker(Speaker speaker) {
+        this.speaker = speaker;
     }
 
     @Override
