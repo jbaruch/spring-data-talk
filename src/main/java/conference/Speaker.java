@@ -1,23 +1,20 @@
 package conference;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Jeka
  * @since 07/10/2014
  */
-@Entity
+@Document
 public class Speaker {
-    @Id
-    @GeneratedValue
-    private Long speakerId;
 
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Talk> talks;
+    private List<Talk> talks;
 
     public Speaker() {
     }
@@ -27,7 +24,7 @@ public class Speaker {
     }
 
     public void addTalk(Talk talk) {
-        if(talks==null) talks = new HashSet<Talk>();
+        if(talks==null) talks = new ArrayList<Talk>();
         talks.add(talk);
     }
 
@@ -35,8 +32,12 @@ public class Speaker {
         return name;
     }
 
-    public Set<Talk> getTalks() {
+    public List<Talk> getTalks() {
         return talks;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

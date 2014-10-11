@@ -1,44 +1,37 @@
 package conference;
 
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author Jeka
  * @since 07/10/2014
  */
-@Repository
-public class SpeakerRepository {
-    @PersistenceContext
-    private EntityManager em;
+public interface SpeakerRepository extends MongoRepository<Speaker, Long> {
 
-    @SuppressWarnings("unchecked")
-    public List<Speaker> findByName(String name) {
-        Query query = em.createQuery("select s from Speaker as s where s.name=:name");
-        return query.setParameter("name", name).getResultList();
+    List<Speaker> findByName(String name);
+
+    List<Speaker> findByNameLike(String name);
+
+    @Query("{'talks.when' : {$gt : ?0, $lt : ?1}}")
+    List<Speaker> findSpeakersWithTalksBetween(Date from, Date to);
+
+    default List<Talk> findTalksBetween(Date from, Date to){
+        List<Speaker> speakers = findSpeakersWithTalksBetween(from, to);
+        return speakers.stream().map(Speaker::getTalks).flatMap(Collection::stream).filter(t -> isBetween(from, to, t)).collect(Collectors.toList());
     }
 
-
-    @SuppressWarnings("unchecked")
-    public List<Speaker> getAllSpeakers() {
-        return em.createQuery("from Speaker").getResultList();
+    default boolean isBetween(Date from, Date to, Talk time) {
+        return time.getWhen().after(from) && time.getWhen().before(to);
     }
 
-    public void save(List<Speaker> speakers) {
-        for (Speaker speaker : speakers) {
-            em.persist(speaker);
-        }
-    }
-
-
-    public int count() {
-        return em.createQuery("select count (s.name) from Speaker s").getFirstResult();
-    }
-
-
+    @Query("{ 'talks.title': {$regex : ?0 }}")
+    Set<Speaker> getSpeakersWithTalksAbout(String name);
 }
