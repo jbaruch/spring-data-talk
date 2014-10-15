@@ -36,9 +36,12 @@ public class SpeakerRepository {
     }
 
 
-    public int count() {
-        return em.createQuery("select count (s.name) from Speaker s").getFirstResult();
+    public long count() {
+        return (long) em.createQuery("select count (s.name) from Speaker s").getSingleResult();
     }
 
 
+    public void deleteAll() {
+        em.createQuery("delete from Speaker").executeUpdate();
+    }
 }
