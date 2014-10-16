@@ -72,7 +72,7 @@ public class NeoMainTest {
     public void testTalksBySpeaker(){
         List<Talk> talks = talkRepository.findTalksBySpeakerName("Evgeny Borisov");
 
-//        Iterable<Talk> talks = talkRepository.findAllTalkBySpeaker("Evgeny Borisov");
+//        Iterable<Talk> talks = talkRepository.findAllTalksBySpeakerName("Evgeny Borisov");
         talks.forEach(talk -> System.out.println("talk = " + talk));
     }
 
